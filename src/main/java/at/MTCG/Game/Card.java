@@ -1,6 +1,12 @@
 package at.MTCG.Game;
 
-public abstract class Card {
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+
+public class Card {
 
     public enum CardType {
         MONSTER, SPELL
@@ -10,9 +16,13 @@ public abstract class Card {
         FIRE, WATER, NORMAL
     }
 
+    @JsonProperty("Id")
+    private String id;
+    @JsonProperty("Name")
     private String name;
     private CardType cardType;
     private ElementType elementType;
+    @JsonProperty("Damage")
     private int damage;
 
     public Card(String name, CardType cardType, ElementType elementType, int damage) {
@@ -22,8 +32,7 @@ public abstract class Card {
         this.damage = damage;
     }
 
-    // Abstract method to handle custom battle logic
-    public abstract boolean canAttack(Card opponent);
+    public Card(){}
 
     // Method to calculate damage in a battle
     public int calculateDamageAgainst(Card opponent) {
@@ -38,7 +47,7 @@ public abstract class Card {
     }
 
     // Method to apply elemental effectiveness
-    private int applyElementalModifiers(Card opponent) {
+    public int applyElementalModifiers(Card opponent) {
         if (this.elementType == ElementType.WATER && opponent.elementType == ElementType.FIRE) {
             return this.damage * 2;  // Water is effective against Fire
         } else if (this.elementType == ElementType.FIRE && opponent.elementType == ElementType.NORMAL) {
@@ -49,11 +58,19 @@ public abstract class Card {
             return this.damage / 2;  // Fire is not effective against Water
         } else if (opponent.elementType == ElementType.FIRE && this.elementType == ElementType.NORMAL) {
             return this.damage / 2;  // Normal is not effective against Fire
+        } else if (opponent.elementType == ElementType.NORMAL && this.elementType == ElementType.WATER) {
+            return this.damage / 2; // Water is not effective against Normal
         }
         return this.damage; // No modification otherwise
     }
 
     // Getters
+
+
+    public String getId() {
+        return id;
+    }
+
     public String getName() {
         return name;
     }

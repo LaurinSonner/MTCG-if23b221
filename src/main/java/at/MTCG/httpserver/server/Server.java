@@ -6,8 +6,6 @@ import at.MTCG.httpserver.utils.Router;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class Server {
     private int port;
@@ -19,7 +17,7 @@ public class Server {
     }
 
     public void start() throws IOException {
-        final ExecutorService executorService = Executors.newFixedThreadPool(10);
+        //final ExecutorService executorService = Executors.newFixedThreadPool(10);
 
         System.out.println("Start http-server...");
         System.out.println("http-server running at: http://localhost:" + this.port);
@@ -27,8 +25,10 @@ public class Server {
         try(ServerSocket serverSocket = new ServerSocket(this.port)) {
             while(true) {
                 final Socket clientConnection = serverSocket.accept();
-                final RequestHandler socketHandler = new RequestHandler(clientConnection, this.router);
-                executorService.submit(socketHandler);
+                Thread t = new Thread(new RequestHandler(clientConnection, this.router));
+                t.start();
+                //final RequestHandler socketHandler = new RequestHandler(clientConnection, this.router);
+                //executorService.submit(socketHandler);
             }
         }
     }

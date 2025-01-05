@@ -22,6 +22,10 @@ public class Response {
 
     public String get() {
 
+        if(this.content == null) {
+            this.content = "";
+        }
+
         String localDatetime = DateTimeFormatter.RFC_1123_DATE_TIME.format(ZonedDateTime.now(ZoneId.of("UTC")));
         return "HTTP/1.1 " + this.status + " " + this.message + "\r\n" +
                 "Cache-Control: max-age=0\r\n" +
@@ -32,5 +36,9 @@ public class Response {
                 "Content-Length: " + this.content.length() + "\r\n" +
                 "\r\n" +
                 this.content;
+    }
+
+    public int getStatus() {
+        return status;
     }
 }

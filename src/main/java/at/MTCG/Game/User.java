@@ -11,6 +11,7 @@ import java.util.List;
 
 public class User {
 
+
     @JsonProperty("Username")
     private String username;
     @JsonProperty("Password")
@@ -32,8 +33,7 @@ public class User {
         this.battlesLost = 0;
     }
 
-    public User()
-    {
+    public User() {
 
     }
 
@@ -47,17 +47,18 @@ public class User {
     }
 
     // Game.User can acquire card packages by spending coins
-    public boolean acquirePackage(List<Card> newCards) {
+    public boolean acquirePackage(Package cardPackage) {
         if (coins < 5) {
-            return false;  // Not enough coins
+            return false; // Not enough coins
         }
-        if (newCards.size() != 5) {
-            throw new IllegalArgumentException("A package must consist of 5 cards.");
-        }
-        coins -= 5;
-        stack.addAll(newCards);
+        coins -= 5; // Deduct the cost of the package
+        List<Card> newCards = cardPackage.openPackage(); // Get cards from the package
+
+        this.stack.addAll(newCards); // Add all cards to the stack
+
         return true;
     }
+
 
     // Get the user's current coin balance
     public int getCoins() {
@@ -133,6 +134,7 @@ public class User {
         return false;
     }
 
+
     // Getters for battle statistics
     public int getBattlesWon() {
         return battlesWon;
@@ -155,6 +157,10 @@ public class User {
         return token;
     }
 
+    public List<Card> getStack() {
+        return stack;
+    }
+
     public void setToken(String token) {
         this.token = token;
     }
@@ -162,5 +168,13 @@ public class User {
     public String generateToken() {
         this.token = username + "-mtcgToken";
         return token;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

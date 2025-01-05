@@ -1,6 +1,7 @@
 package at.MTCG;
 
 import at.MTCG.httpserver.server.Server;
+import at.MTCG.httpserver.services.PackageService;
 import at.MTCG.httpserver.services.SessionService;
 import at.MTCG.httpserver.services.UserService;
 import at.MTCG.httpserver.utils.Router;
@@ -23,6 +24,8 @@ public class Main {
         UserService userService = new UserService();
         router.addService("/users", userService);
         router.addService("/sessions", new SessionService(userService));
+
+        router.addService("/packages", new PackageService());
 
 
         return router;
