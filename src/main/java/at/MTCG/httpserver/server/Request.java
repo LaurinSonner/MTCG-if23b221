@@ -14,6 +14,14 @@ public class Request {
     private HeaderMap headerMap =  new HeaderMap();
     private String body;
 
+    public String getHeader(String name) {
+        if (headerMap == null) {
+            return null; // Falls kein Header vorhanden ist
+        }
+        return headerMap.getHeader(name);
+    }
+
+
     public String getServiceRoute(){
         if (this.pathParts == null ||
                 this.pathParts.isEmpty()) {

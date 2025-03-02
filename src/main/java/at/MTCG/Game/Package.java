@@ -15,6 +15,10 @@ public class Package {
         this.cards = new ArrayList<>(cards);
     }
 
+
+
+
+
     // Method to open the package and get all cards
     public List<Card> openPackage() {
         return new ArrayList<>(cards); // Return a copy to ensure immutability

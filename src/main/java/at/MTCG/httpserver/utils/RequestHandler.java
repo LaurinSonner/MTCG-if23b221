@@ -4,6 +4,7 @@ import at.MTCG.httpserver.http.ContentType;
 import at.MTCG.httpserver.http.HttpStatus;
 import at.MTCG.httpserver.server.Request;
 import at.MTCG.httpserver.server.Response;
+import at.MTCG.httpserver.server.UnauthorizedException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -26,8 +27,10 @@ public class RequestHandler implements Runnable {
 
     @Override
     public void run() {
+        Response response;
+
         try {
-            Response response;
+
             Request request = new RequestBuilder().buildRequest(this.bufferedReader);
 
             if (request.getPathname() == null) {
@@ -37,12 +40,20 @@ public class RequestHandler implements Runnable {
                         "[]"
                 );
             } else {
-                response = this.router.resolve(request.getServiceRoute()).handleRequest(request);
+                try {
+                    response = this.router.resolve(request.getServiceRoute()).handleRequest(request);
+                } catch (UnauthorizedException e) {
+                    response = new Response(
+                            HttpStatus.UNAUTHORIZED,
+                            ContentType.JSON,
+                            e.getMessage());
+                }
+
             }
             printWriter.write(response.get());
         } catch (IOException e) {
             System.err.println(Thread.currentThread().getName() + " Error: " + e.getMessage());
-        }catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
             try {

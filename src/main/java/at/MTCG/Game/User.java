@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -19,9 +20,10 @@ public class User {
     private int coins;
     private List<Card> stack; // The user's full collection of cards
     private List<Card> deck;  // The user's selected deck for battles
-    private int battlesWon;
-    private int battlesLost;
+    private int wins;
+    private int losses;
     private String token;
+    private int elo;
 
     public User(String username, String password) {
         this.username = username;
@@ -29,12 +31,16 @@ public class User {
         this.coins = 20; // Every user starts with 20 coins
         this.stack = new ArrayList<>();
         this.deck = new ArrayList<>();
-        this.battlesWon = 0;
-        this.battlesLost = 0;
+        this.wins = 0;
+        this.losses = 0;
     }
 
     public User() {
+    }
 
+    public User(String username, List<Card> deck) {
+        this.username = username;
+        this.deck = deck;
     }
 
     public boolean authenticate(String username, String password) {
@@ -96,57 +102,89 @@ public class User {
     }
 
     // Battle against another user
-    public boolean battle(User opponent) {
-        List<Card> opponentDeck = opponent.getDeck();
-        if (this.deck.size() != 4 || opponentDeck.size() != 4) {
-            throw new IllegalArgumentException("Both players must have a full deck of 4 cards.");
-        }
+    public BattleResult battle(User opponent) {
+        List<Card> playerDeck = new ArrayList<>(this.deck);
+        List<Card> opponentDeck = new ArrayList<>(opponent.deck);
 
-        int myWins = 0;
-        int opponentWins = 0;
+        StringBuilder battleLog = new StringBuilder();
+        battleLog.append("Battle between ").append(this.username).append(" and ").append(opponent.username).append("\n");
 
-        // Simulate 4 rounds of battle
-        for (int i = 0; i < 4; i++) {
-            Card myCard = this.deck.get(i);
-            Card opponentCard = opponentDeck.get(i);
+        int round = 0;
+        while (!playerDeck.isEmpty() && !opponentDeck.isEmpty() && round < 100) {
+            round++;
+            battleLog.append("Round ").append(round).append(":\n");
 
-            // Compare damage (you could expand this by using a battle logic class or method)
-            int myDamage = myCard.calculateDamageAgainst(opponentCard);
-            int opponentDamage = opponentCard.calculateDamageAgainst(myCard);
+            // Wählt zufällig eine Karte aus beiden Decks
+            Collections.shuffle(playerDeck);
+            Collections.shuffle(opponentDeck);
+            Card playerCard = playerDeck.get(0);
+            Card opponentCard = opponentDeck.get(0);
 
-            if (myDamage > opponentDamage) {
-                myWins++;
-            } else if (opponentDamage > myDamage) {
-                opponentWins++;
+            // Berechnet den Schaden mit den bereits implementierten Methoden in `Card`
+            int playerDamage = playerCard.calculateDamageAgainst(opponentCard);
+            int opponentDamage = opponentCard.calculateDamageAgainst(playerCard);
+
+            battleLog.append(this.username).append("'s ").append(playerCard.getName()).append(" (")
+                    .append(playerDamage).append(" DMG) vs. ")
+                    .append(opponent.username).append("'s ").append(opponentCard.getName()).append(" (")
+                    .append(opponentDamage).append(" DMG)\n");
+
+            // Bestimmt den Gewinner der Runde
+            if (playerDamage > opponentDamage) {
+                battleLog.append(playerCard.getName()).append(" wins!\n");
+                opponentDeck.remove(opponentCard);
+            } else if (opponentDamage > playerDamage) {
+                battleLog.append(opponentCard.getName()).append(" wins!\n");
+                playerDeck.remove(playerCard);
+            } else {
+                battleLog.append("It's a draw!\n");
             }
         }
 
-        if (myWins > opponentWins) {
-            this.battlesWon++;
-            opponent.battlesLost++;
-            return true; // This user wins the battle
-        } else if (opponentWins > myWins) {
-            this.battlesLost++;
-            opponent.battlesWon++;
-            return false; // Opponent wins the battle
+
+        if (round >= 100) {
+            battleLog.append("Battle reached 100 rounds! It's a forced draw.\n");
+            return new BattleResult(null, null, battleLog.toString(), true); // ✅ Winner & Loser sind NULL!
         }
-        // If it's a draw, neither win/lose stats change
-        return false;
+
+        // Ergebnis berechnen
+        if (playerDeck.isEmpty()) {
+            battleLog.append(opponent.username).append(" wins the battle!\n");
+            updateStatsAfterBattle(false);
+            opponent.updateStatsAfterBattle(true);
+            return new BattleResult(opponent, this, battleLog.toString(), false);
+        } else {
+            battleLog.append(this.username).append(" wins the battle!\n");
+            updateStatsAfterBattle(true);
+            opponent.updateStatsAfterBattle(false);
+            return new BattleResult(this, opponent, battleLog.toString(), false);
+        }
+    }
+
+
+    private void updateStatsAfterBattle(boolean won) {
+        if (won) {
+            this.elo += 3;
+            this.wins++;
+        } else {
+            this.elo -= 5;
+            this.losses++;
+        }
     }
 
 
     // Getters for battle statistics
     public int getBattlesWon() {
-        return battlesWon;
+        return wins;
     }
 
-    public int getBattlesLost() {
-        return battlesLost;
+    public int getLosses() {
+        return losses;
     }
 
     // Scoreboard comparison: Users are ranked by number of battles won
     public static int compareByScore(User u1, User u2) {
-        return Integer.compare(u2.battlesWon, u1.battlesWon); // Descending order
+        return Integer.compare(u2.wins, u1.wins); // Descending order
     }
 
     public String getPassword() {

@@ -8,6 +8,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Card {
 
+
+    public Card(String id, String name, int damage, ElementType elementType, CardType cardType) {
+        this.id = id;
+        this.name = name;
+        this.damage = damage;
+        this.cardType = cardType;
+        this.elementType = elementType;
+    }
+
     public enum CardType {
         MONSTER, SPELL
     }
@@ -27,15 +36,22 @@ public class Card {
 
     public Card(String name, CardType cardType, ElementType elementType, int damage) {
         this.name = name;
+        this.damage = damage;
         this.cardType = cardType;
         this.elementType = elementType;
-        this.damage = damage;
     }
 
-    public Card(){}
+    public Card() {
+    }
 
     // Method to calculate damage in a battle
     public int calculateDamageAgainst(Card opponent) {
+
+        // Check if Special Rule applys
+        if (applySpecialRules(opponent)) {
+            return 0;
+        }
+
         if (this.cardType == CardType.MONSTER && opponent.cardType == CardType.MONSTER) {
             // Pure monster fight, element does not matter
             return this.damage;
@@ -62,6 +78,35 @@ public class Card {
             return this.damage / 2; // Water is not effective against Normal
         }
         return this.damage; // No modification otherwise
+    }
+
+    private boolean applySpecialRules(Card opponent) {
+        // Goblins greifen keine Drachen an
+        if (this.name.toLowerCase().contains("goblin") && opponent.name.toLowerCase().contains("dragon")) {
+            return true;
+        }
+
+        // Zauberer kontrollieren Orks
+        if (this.name.toLowerCase().contains("wizard") && opponent.name.toLowerCase().contains("ork")) {
+            return true;
+        }
+
+        // Ritter ertrinken sofort durch Wasserzauber
+        if (this.name.toLowerCase().contains("knight") && opponent.cardType == CardType.SPELL && opponent.elementType == ElementType.WATER) {
+            return true;
+        }
+
+        // Kraken sind immun gegen Zauber
+        if (this.name.toLowerCase().contains("kraken") && opponent.cardType == CardType.SPELL) {
+            return true;
+        }
+
+        // Feuerelfen können Drachenangriffe ausweichen
+        if (this.name.toLowerCase().contains("fireelf") && opponent.name.toLowerCase().contains("dragon")) {
+            return true;
+        }
+
+        return false; // Keine Spezialregel greift
     }
 
     // Getters

@@ -1,9 +1,7 @@
 package at.MTCG;
 
 import at.MTCG.httpserver.server.Server;
-import at.MTCG.httpserver.services.PackageService;
-import at.MTCG.httpserver.services.SessionService;
-import at.MTCG.httpserver.services.UserService;
+import at.MTCG.httpserver.services.*;
 import at.MTCG.httpserver.utils.Router;
 
 import java.io.IOException;
@@ -22,12 +20,20 @@ public class Main {
     private static Router configureRouter() {
         Router router = new Router();
         UserService userService = new UserService();
+        PackageService packageService = new PackageService();
+        CardService cardService = new CardService();
+        TradingService tradingService = new TradingService();
+        GameService gameService = new GameService();
         router.addService("/users", userService);
-        router.addService("/sessions", new SessionService(userService));
-
-        router.addService("/packages", new PackageService());
-
-
+        router.addService("/sessions", userService);
+        router.addService("/packages", packageService);
+        router.addService("/transactions", packageService);
+        router.addService("/cards", cardService);
+        router.addService("/deck", cardService);
+        router.addService("/tradings", tradingService);
+        router.addService("/stats", gameService);
+        router.addService("/scoreboard", gameService);
+        router.addService("/battles", gameService);
         return router;
     }
 
