@@ -47,7 +47,7 @@ public class Card {
     // Method to calculate damage in a battle
     public int calculateDamageAgainst(Card opponent) {
 
-        // Check if Special Rule applys
+        // Check if a Special Rule applys
         if (applySpecialRules(opponent)) {
             return 0;
         }
@@ -81,33 +81,35 @@ public class Card {
     }
 
     private boolean applySpecialRules(Card opponent) {
-        // Goblins greifen keine Drachen an
+        // Goblins do not attack Dragons
         if (this.name.toLowerCase().contains("goblin") && opponent.name.toLowerCase().contains("dragon")) {
             return true;
         }
 
-        // Zauberer kontrollieren Orks
-        if (this.name.toLowerCase().contains("wizard") && opponent.name.toLowerCase().contains("ork")) {
+        // Ork get controlled by wizards and are unable to attack
+        if (this.name.toLowerCase().contains("ork") && opponent.name.toLowerCase().contains("wizard")) {
             return true;
         }
 
-        // Ritter ertrinken sofort durch Wasserzauber
+        // Knights drown instantly from Water Spells
         if (this.name.toLowerCase().contains("knight") && opponent.cardType == CardType.SPELL && opponent.elementType == ElementType.WATER) {
             return true;
         }
 
-        // Kraken sind immun gegen Zauber
+        // Krakens are immune to spells
         if (this.name.toLowerCase().contains("kraken") && opponent.cardType == CardType.SPELL) {
             return true;
         }
 
-        // Feuerelfen können Drachenangriffe ausweichen
+        // Fire Elves can dodge Dragon attacks
         if (this.name.toLowerCase().contains("fireelf") && opponent.name.toLowerCase().contains("dragon")) {
             return true;
         }
 
-        return false; // Keine Spezialregel greift
+        return false; // No special rule applies
     }
+
+
 
     // Getters
 

@@ -14,6 +14,8 @@ class CardTest {
     private Card normalSpell;
     private Card waterMonster;
     private Card waterSpell;
+    private Card normalOrk;
+    private Card normalWizard;
 
 
     @BeforeEach
@@ -24,6 +26,8 @@ class CardTest {
         fireSpell = new Card("Fireball", Card.CardType.SPELL, Card.ElementType.FIRE, 10);
         waterMonster = new Card("Dragon", Card.CardType.MONSTER, Card.ElementType.WATER, 10);
         waterSpell = new Card("Waterball", Card.CardType.SPELL, Card.ElementType.WATER, 10);
+        normalOrk = new Card("Ork", Card.CardType.MONSTER, Card.ElementType.NORMAL, 10);
+        normalWizard = new Card("Wizard", Card.CardType.MONSTER, Card.ElementType.NORMAL, 10);
     }
 
 
@@ -76,7 +80,14 @@ class CardTest {
         assertEquals(5, calculatedDamageCard2);
     }
 
+    @Test
+    void testCalculatedDamageWithSpecialRuleWizardOrks() {
+        double calculatedDamageCard1 = normalOrk.calculateDamageAgainst(normalWizard);
+        double calculatedDamageCard2 = normalWizard.calculateDamageAgainst(normalOrk);
 
+        assertEquals(0, calculatedDamageCard1);
+        assertEquals(10.0, calculatedDamageCard2);
+    }
 
 
 
